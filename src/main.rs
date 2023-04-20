@@ -147,3 +147,65 @@ fn main() {
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Test if the MagicBook initializes with a genesis spell
+    #[test]
+    fn test_magic_book_initialization() {
+        let magic_book = MagicBook::new();
+        assert_eq!(magic_book.spells.len(), 1);
+        assert_eq!(magic_book.spells[0].magic_word, "Let the magic begin!");
+        assert_eq!(magic_book.spells[0].wizard.name, "Merlin");
+    }
+
+    // Test if a spell is added to the MagicBook
+    #[test]
+    fn test_add_spell() {
+        let mut magic_book = MagicBook::new();
+        let test_wizard = Wizard {
+            name: "TestWizard".to_string(),
+            public_key: vec![9, 10, 11, 12],
+        };
+        let test_spell = Spell {
+            wizard: test_wizard,
+            magic_word: "TestingMagic!".to_string(),
+            timestamp: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_secs(),
+            nonce: 0,
+            prev_spell_hash: magic_book.compute_hash(magic_book.spells.last().unwrap()),
+        };
+        magic_book.add_spell(test_spell);
+        assert_eq!(magic_book.spells.len(), 2);
+        assert_eq!(magic_book.spells[1].magic_word, "TestingMagic!");
+        assert_eq!(magic_book.spells[1].wizard.name, "TestWizard");
+    }
+
+    // Test if a mined spell is valid and matches the difficulty level
+    #[test]
+    fn test_mine_spell() {
+        let mut magic_book = MagicBook::new();
+        let test_wizard = Wizard {
+            name: "TestWizard".to_string(),
+            public_key: vec![9, 10, 11, 12],
+        };
+        let test_spell = Spell {
+            wizard: test_wizard,
+            magic_word: "TestingMagic!".to_string(),
+            timestamp: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_secs(),
+            nonce: 0,
+            prev_spell_hash: magic_book.compute_hash(magic_book.spells.last().unwrap()),
+        };
+        let difficulty = 2;
+        magic_book.mine_spell(test_spell, difficulty);
+        assert_eq!(magic_book.spells.len(), 2);
+        assert!(magic_book.hash_matches_difficulty(&magic_book.spells[1], difficulty));
+    }
+}
