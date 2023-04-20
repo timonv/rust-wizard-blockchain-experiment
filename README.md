@@ -35,7 +35,9 @@ cargo run
 ## Haiku
 
 Wizards cast their spells,
+
 Mined within the Magic Book,
+
 Blockchain mystique thrives.
 
 ## License
